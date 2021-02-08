@@ -1,0 +1,418 @@
+Create SpaceInvaders project.
+Drag in ship image.
+Create Sprite game object and name it Cannon.
+Drag ship to be sprite of the Cannon.
+
+Create script file named CannonScript and attach to the Cannon game object.
+
+****Explain about Unity scripting reference
+        Search for MonoBehaviour
+
+Show how to change position of the Cannon using transform.position.
+Move the cannon in the scene and locate a spot on the edge of the camera.
+Look at its x value in the inspector then set that x val using transform.position.
+
+Now have everyone set in Start method
+        float topPos = Camera.main.orthographicSize;
+        transform.position = new Vector3(0, -topPos, 0);
+
+Give the Cannon a tag of Cannon
+=============================================
+Moving the cannon.
+
+Below code shows concepts of 
+1) Getting input from arrow keys.
+2) Translating cannon.
+3) Changing a value in the inspector.
+
+public class CannonScript : MonoBehaviour
+{
+    public float cannonSpeed = 1.0f;
+    float topPos;
+    // Start is called before the first frame update
+    void Start()
+    {
+        topPos = Camera.main.orthographicSize;
+        transform.position = new Vector3(0, -topPos, 0);
+    }
+
+    // Update is called once per frame
+    void Update()
+    {
+        float xtrans = Input.GetAxis("Horizontal")*Time.deltaTime*cannonSpeed;
+        transform.Translate(xtrans, 0, 0);
+    }
+}
+=============================================
+Stopping the cannon at the sides.
+
+Below code shows concepts of 
+1) Understanding the left and right sides.
+2) Stopping the cannon movement left and right.
+
+public class CannonScript : MonoBehaviour
+{
+    public float cannonSpeed = 1.0f;
+    float topPos;
+    float rightPos;   //new code
+    // Start is called before the first frame update
+    void Start()
+    {
+        topPos = Camera.main.orthographicSize;
+        rightPos = Camera.main.orthographicSize * Camera.main.aspect;   //new code
+        transform.position = new Vector3(0, -topPos, 0);
+    }
+
+    // Update is called once per frame
+    void Update()
+    {
+        float xtrans = Input.GetAxis("Horizontal")*Time.deltaTime*cannonSpeed;
+        transform.Translate(xtrans, 0, 0);
+   //new code below
+        if (transform.position.x > rightPos)
+            transform.position = new Vector3(rightPos, transform.position.y, transform.position.z);
+        else if (transform.position.x < -rightPos)
+            transform.position = new Vector3(-rightPos, transform.position.y, transform.position.z);
+    }
+}
+
+=============================================
+Shooting a laser.
+
+Drag in laser image.
+Create Sprite game object and name it Laser
+Drag laser to be sprite of the Laser
+Change the scale of the laser to 1,.3,1
+Create script file named LaserScript and attach to the Laser game object.     *******3/6/19
+
+Give the Laser a tag of Laser
+===========================================
+Add the following code to the laser script file
+
+public class LaserScript : MonoBehaviour
+{
+    public float laserSpeed = 1;
+    // Start is called before the first frame update
+    void Start()
+    {
+        
+    }
+
+    // Update is called once per frame
+    void Update()
+    {
+        float ytrans = laserSpeed * Time.deltaTime;
+        transform.Translate(0, ytrans, 0);
+    }
+}
+
+===========================================
+
+Connecting the laser to the cannon.
+
+Add to CannonScript
+   public GameObject laserObj;
+and drag the laser game object to the variable in the inspector.
+
+so that we can set info about the laser from the cannon.  Add the code.
+
+public class CannonScript : MonoBehaviour
+{
+    public GameObject laserObj;    //new code
+    public float cannonSpeed = 1.0f;
+    float topPos;
+    float rightPos;
+    // Start is called before the first frame update
+    void Start()
+    {
+        topPos = Camera.main.orthographicSize;
+        rightPos = Camera.main.orthographicSize * Camera.main.aspect;
+        transform.position = new Vector3(0, -topPos, 0);
+    }
+
+    // Update is called once per frame
+    void Update()
+    {
+        float xtrans = Input.GetAxis("Horizontal")*Time.deltaTime*cannonSpeed;
+        transform.Translate(xtrans, 0, 0);
+        if (transform.position.x > rightPos)
+            transform.position = new Vector3(rightPos, transform.position.y, transform.position.z);
+        else if (transform.position.x < -rightPos)
+            transform.position = new Vector3(-rightPos, transform.position.y, transform.position.z);
+    //new code below.
+        if (Input.GetKeyDown("space"))
+        {
+            laserObj.transform.position = new Vector3(transform.position.x, transform.position.y, 0);
+        }
+    }
+}
+
+
+===========================================
+The problem is that we only have 1 laser.  Now we will add multiple lasers.
+
+Drag the laser game object to the assets window.  This will make a laser prefab.
+Drag the laser prefab to the laserObj variable in the inspector of the Cannon.
+Now change the following code in CannonScript
+
+        if (Input.GetKeyDown("space"))
+        {
+            Instantiate(laserObj, transform.position, transform.rotation);  //new code.
+//            laserObj.transform.position = new Vector3(transform.position.x, transform.position.y, 0);
+        }
+
+
+===========================================
+The problem is that we keep adding more lasers but don't make them go away.
+
+Now change the following code in LaserScript
+
+void Update()
+    {
+        float ytrans = laserSpeed * Time.deltaTime;
+        transform.Translate(0, ytrans, 0);
+
+//code added below.
+        if (transform.position.y > Camera.main.orthographicSize)
+        {
+            Destroy(gameObject);
+        }
+    }
+
+===========================================
+Add invader
+Do the same as what you did for the cannon.
+Name sprite game object Invader.
+Scale the invader to .5,.5,.5
+Attach image to game object.
+Create and attach InvaderScript to game object.        ******03/9/19
+
+Add the following code to InvaderScript.
+public class InvaderScript : MonoBehaviour
+{
+    public float invaderSpeed = .2f;
+    // Start is called before the first frame update
+    void Start()
+    {
+        float top = Camera.main.orthographicSize;
+        float right = Camera.main.orthographicSize * Camera.main.aspect;
+        float randomX = Random.Range(-right, right);
+        float randomY = Random.Range(0, top);
+        transform.position = new Vector3(randomX, randomY, 0);
+    }
+
+    // Update is called once per frame
+    void Update()
+    {
+        transform.Translate(0, -invaderSpeed*Time.deltaTime, 0);
+    }
+}
+
+Give the Invader a tag of Invader
+===========================================
+Now instantiate the invaders.
+
+Make a prefab of the invader game object.
+
+Create a script file named GeneralScript and attach to the main camera.
+Add the following code to GeneralScript
+
+public class GeneralScript : MonoBehaviour
+{
+    public GameObject invaders;
+    public int numInvaders = 5;
+    // Start is called before the first frame update
+    void Start()
+    {
+        for (int i = 0; i < numInvaders;i++)
+        {
+            Instantiate(invaders, transform.position, transform.rotation);
+        }
+    }
+
+    // Update is called once per frame
+    void Update()
+    {
+        
+    }
+}
+
+Make the invader a prefab and drag to the variable invader in GeneralScript component of main camera game object.
+
+Now lets delete the Invader and the Laser game objects since they are now both prefabs.
+====================================
+Destroy the invader when it is hit by a laser.
+
+Add the following code to the InvaderScript.
+
+    void OnTriggerEnter(Collider other)
+    {
+        if (other.tag.Equals("Laser"))
+        {
+            Destroy(gameObject);
+        }
+    }
+
+Now add a box collider component to the laser and invader prefabs.
+Select the isTrigger box for invader.
+
+Now add a rigid body component to tyhe invader prefab. 
+Select isKinimatic and turn off gravity.
+=================================
+Make the space invader move side to side.
+Add code to invader script.
+
+add left and right as variables
+In Start method set left and right.
+
+void Update()
+    {
+        transform.Translate(invaderDir * Time.deltaTime, -invaderSpeed*Time.deltaTime, 0);
+        if (transform.position.x > right)
+            invaderDir = -Mathf.Abs(invaderDir);
+        else if (transform.position.x < left)
+            invaderDir = Mathf.Abs(invaderDir);
+
+
+
+===================================
+Game over when a space invader hits the ground.
+
+Add code to GeneralScript.cs
+public void GameOver()
+    {
+        print("game over");
+    }
+
+Add code to InvaderScript.cs
+Create variable bottom.
+
+ void Update()
+    {
+        transform.Translate(0, -invaderSpeed*Time.deltaTime, 0);
+
+        if (transform.position.y < bottom)
+        {
+            GameObject.Find("Main Camera").GetComponent<GeneralScript>().GameOver();
+        }
+    }
+run program and if a space invader gets to the ground, "game over" is displayed to the console.
+
+
+Drag the game over image into the assets.
+Create a sprite named gameOver and attach the image to it.
+Scale it 2,2,1.
+
+Add code to GeneralScript.cs
+   public GameObject gameOver;
+
+    void Start()
+    {
+        gameOver.GetComponent<SpriteRenderer>().enabled = false;
+        ...
+    }
+
+public void GameOver()
+    {
+//        print("game over");
+        gameOver.GetComponent<SpriteRenderer>().enabled = true;
+    }
+
+Add code to InvaderScript.cs
+public GameObject gameOver;
+
+===========================================
+Add score to the game.
+
+In generalscript add a variable for the score and set it to 0 in Start method.
+
+Add method 
+   public void AddScore()
+    {
+        score++;
+        print(score);
+    }
+
+
+In invader script, add
+
+    void OnTriggerEnter(Collider other)
+    {
+        if (other.tag.Equals("Laser"))
+        {
+            GameObject.Find("Main Camera").GetComponent<GeneralScript>().AddScore();    //added
+            Destroy(gameObject);
+        }
+    }
+
+
+run program and check the console.
+
+
+Add a new game object
+GameObject->UI->Text   and name the gameobject Score.
+
+Add to general script
+using UnityEngine.UI;
+
+public class GeneralScript : MonoBehaviour
+{
+    public Text scoreText;
+   ....
+
+   void Start()
+    {
+        score = 0;
+        scoreText.text = "Score = " + score;    //added
+        ...
+
+
+public void AddScore()
+    {
+        score++;
+        scoreText.text = "Score = " + score;    //added
+    }
+
+Make sure to drag the score text game object to the inspector for   MainCamera->GeneralScript->TextScore
+
+Change the color and size and location of the text.
+=====================================
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
